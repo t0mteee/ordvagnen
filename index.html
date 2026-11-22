@@ -1363,6 +1363,23 @@ body.stilla *, body.stilla *::before, body.stilla *::after{
 .brickor{display:flex;gap:12px;justify-content:center;margin:14px}
 #ordbiljett .bricka{touch-action:none;user-select:none;font-size:1.5rem;min-width:48px}
 #ordbiljett input{font-size:18px;width:8em}
+.bokstart{display:flex;gap:16px;align-items:center;width:100%;margin:16px 0;padding:16px;background:#fff3dc;text-align:left}
+.bokstart i{font-style:normal;background:#ffcf84;color:#64321b;border-radius:13px;padding:5px 14px;font-size:2rem}
+.bokrum{color:var(--ink);border:3px solid var(--ink);border-radius:24px;width:min(94vw,650px);max-height:92dvh;overflow:auto;padding:clamp(14px,3vw,28px);background:#fff9ec;text-align:center}
+.bokrum::backdrop{background:rgba(28,23,50,.78)}
+.bokrum{border-bottom:9px solid #cd9250;background:linear-gradient(180deg,#e2f4fa 0%,#fff8e9 62%)}
+.bokextra{margin:18px 0}.bokextra>summary{cursor:pointer;font-weight:800;padding:10px}
+.bokrum header{text-align:left}.bokrum header button,.bokrum .btn{font-size:1rem;padding:9px 14px;min-height:44px}
+.bokrum h2{margin:12px 0;font-size:clamp(1.5rem,5vw,2.2rem)}
+.bokpar{display:grid;grid-template-columns:2fr 3fr;align-items:center;gap:clamp(10px,3vw,24px);padding:12px 0}
+.bokstavskort,.bildkort{font:inherit;border:3px solid #d9a953;border-radius:20px;background:#fff2d5;color:var(--ink);box-shadow:0 5px 0 #e3b66b;cursor:pointer}
+.bokstavskort{font-size:clamp(3.5rem,15vw,6rem);font-weight:900;color:#a22d35;min-height:112px}
+.bildkort{display:grid;justify-items:center;gap:4px;padding:12px;width:100%;font-weight:900;font-size:2rem}
+.bildkort b{color:#a22d35}.bildkort small{font-size:.9rem}.bildkort .illustration,.bokrum .ordbild{font-size:clamp(3rem,13vw,5rem)}
+.bokval{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px}.bokval .primar{background:var(--sun)}
+.bokrum .bricka{touch-action:none;user-select:none;min-width:54px;font-size:2rem}.bokrum input{font-size:18px;width:8em}
+.bokrum .ordrutor{letter-spacing:.13em;font-size:2.2rem}.bokrum .ordrutor em{color:#925326;font-style:normal;border-bottom:3px dotted currentColor}
+@media(max-height:500px){.bokrum h2{margin:4px}.bokpar{padding:2px}.bildkort .illustration{font-size:3rem}.bildkort{padding:4px}.bokstavskort{min-height:78px}}
 </style>
 </head>
 <body>
@@ -1447,10 +1464,6 @@ body.stilla *, body.stilla *::before, body.stilla *::after{
 
   <!-- ── SPÅRVAGN: VÄLJ LINJE ───────────── -->
   <section id="screen-lines" class="screen">
-    <nav class="world-shortcuts" aria-label="Välj vad du vill göra">
-      <button class="btn" type="button" data-world-shortcut="land">Räknebanor</button>
-      <button class="btn" type="button" data-world-shortcut="tram" aria-current="page">Åka vagn</button>
-    </nav>
     <div id="startTram"></div>
     <p class="footnote" id="tramCredit"></p>
   </section>
@@ -1562,6 +1575,7 @@ body.stilla *, body.stilla *::before, body.stilla *::after{
 
 </main>
 
+<dialog id="bokrum" class="bokrum" aria-labelledby="bokrubrik"><header><button type="button" class="btn" id="lamnaBok">← Tillbaka</button></header><div id="bokyta"></div></dialog>
 <input type="file" id="kopiaFil" accept=".json,application/json" hidden>
 
 <!-- ── Kartan till väggen ─────────────────── -->
@@ -5143,12 +5157,14 @@ function renderStart(){
               : startFilter === "and" ? ANDSTATIONER.slice().sort((a, b) => a.localeCompare(b, "sv"))
               : (lineByRef(startFilter) || TRAM_LINES[0]).stops;
   el("startTram").innerHTML = `
-    <div class="tram-start"><h1>Ordvagnen</h1><p>Välj en vagn. Vid hållplatsen kan du ta en ordbiljett eller åka vidare.</p></div>
+    <div class="tram-start"><h1>Ordvagnen</h1></div>
     ${r ? `<button class="fortsatt" data-fortsatt type="button">
         ${stoppBildHTML(r.pos)}
         <span style="min-width:0"><b>Fortsätt resan</b><small>Från ${r.pos} · linje ${r.ref} mot ${r.rikt === 1 ? rl.b : rl.a}</small></span>
         ${roundel(rl)}
       </button>` : `<button class="btn btn-big borja-aka" data-borja-aka type="button">${tramSVG("#62CDF2", "")}<span>Börja åka<small>Välj din första hållplats</small></span></button>`}
+    <button class="btn bokstart" data-boklek type="button"><i aria-hidden="true">Aa</i>Lek med bokstäver</button>
+    <details class="bokextra" ${startVisa.extra ? "open" : ""}><summary>Fler hållplatser, vagnar och lekar</summary>
     ${(() => {
       const oppen = startVisa.annanstans;
       return `<button class="start-knapp" data-visa="annanstans" type="button" aria-expanded="${oppen}">
@@ -5203,11 +5219,14 @@ function renderStart(){
           </span>
           <span class="line-prog ${klar ? "klar" : ""}">${klar ? "Hela linjen!" : b + "/" + n}</span>
         </button>`; }).join("")}
-    </div></div>` : ""}`;
+    </div></div>` : ""}</details>`;
+  const extra = el("startTram").querySelector(".bokextra");
+  extra.ontoggle = () => { if(extra.isConnected) startVisa.extra = extra.open; };
   el("tramCredit").innerHTML = "Hållplatser, linjefärger och lägen från OpenStreetMap (© OpenStreetMap-bidragsgivare)";
 }
 
 el("startTram").addEventListener("click", (e) => {
+  if(e.target.closest("[data-boklek]")){ startaBoklek(); return; }
   if(e.target.closest("[data-borja-aka]")){ SFX.ensure(); SFX.tap(); openResestart(); return; }
   const visa = e.target.closest("[data-visa]");
   if(visa){
@@ -6118,11 +6137,12 @@ el("goBtn").addEventListener("click", () => {
 
 const biljettOrd = [["sol","☀️"],["mus","🐭"],["ros","🌹"],["bil","🚗"],["hus","🏠"],["sko","👟"]];
 let biljettLjud;
-function lasBiljett(ord){
+function lasBiljett(ord, fil = ord){
   if(biljettLjud) biljettLjud.pause();
   if(P().settings?.voice === false) return;
-  biljettLjud = new Audio("./ljud/ord/" + ord + ".m4a");
-  biljettLjud.play().catch(() => speak(ord, true));
+  const ljud = new Audio("./ljud/ord/" + fil + ".m4a");
+  biljettLjud = ljud;
+  ljud.play().catch(e => { if(e.name !== "AbortError" && biljettLjud === ljud) speak(ord, true); });
 }
 function visaBiljettknapp(dold){
   const ruta = el("ordbiljett");
@@ -6130,26 +6150,65 @@ function visaBiljettknapp(dold){
   ruta.replaceChildren();
   if(dold) return;
   const knapp = document.createElement("button");
-  knapp.type = "button"; knapp.className = "btn"; knapp.textContent = "🎟️ Ta en ordbiljett";
+  knapp.type = "button"; knapp.className = "btn"; knapp.textContent = "Aa · Lek med bokstäver";
   ruta.append(knapp);
-  knapp.onclick = () => oppnaOrdbiljett(ruta);
+  knapp.onclick = startaBoklek;
 }
-function oppnaOrdbiljett(ruta){
+function startaBoklek(){
+  const dialog = el("bokrum"), ruta = el("bokyta"), p = P();
+  el("lamnaBok").textContent = aktivSkarm === "trip" ? "← Till kartan" : "← Till starten";
+  el("lamnaBok").onclick = () => dialog.close();
+  dialog.onclose = () => { biljettLjud?.pause(); tystna(); };
+  dialog.showModal();
+  function nyttKort(){
+    biljettLjud?.pause();
+    const index = Number.isSafeInteger(p.bokkort) && p.bokkort >= 0 ? p.bokkort : 0;
+    const [ord,bild] = biljettOrd[index % biljettOrd.length];
+    const bokstav = ord[0].toUpperCase();
+    ruta.innerHTML = `<h2 id="bokrubrik">Tryck på ${bokstav}</h2><div class="bokpar"><button type="button" class="bokstavskort">${bokstav}</button><button type="button" class="bildkort" aria-label="Hör ordet ${ord}"><span class="illustration" aria-hidden="true">${bild}</span><span><b>${bokstav}</b>${ord.slice(1)}</span><small>🔊 Lyssna</small></button></div><div class="bokval"></div>`;
+    const fras = bokstav + " som i " + ord + ". Tryck på " + bokstav + ".";
+    tystna(); lasBiljett(fras, "kort-" + ord);
+    ruta.querySelector(".bildkort").onclick = () => { tystna(); lasBiljett(ord); };
+    const bok = ruta.querySelector(".bokstavskort");
+    bok.onclick = () => {
+      bok.disabled = true; p.bokkort = index+1; saveProfiles();
+      ruta.querySelector("h2").textContent = bokstav + " som i " + ord;
+      tystna(); lasBiljett(ord);
+      const val = ruta.querySelector(".bokval");
+      val.innerHTML = '<button class="btn primar" type="button">Nästa bild →</button><button class="btn stava" type="button">Bygg ordet</button>';
+      val.querySelector(".primar").onclick = nyttKort;
+      val.querySelector(".stava").onclick = () => oppnaOrdbiljett(ruta,index,nyttKort);
+      val.querySelector(".primar").focus({preventScroll:true});
+    };
+  }
+  nyttKort();
+}
+function oppnaOrdbiljett(ruta,index,fortsatt){
   const p = P(), antal = Number.isSafeInteger(p.ordbiljetter) ? p.ordbiljetter : 0;
-  const [ord,bild] = biljettOrd[antal % biljettOrd.length];
+  const [ord,bild] = biljettOrd[(index ?? antal) % biljettOrd.length];
   ruta.innerHTML = '<strong>Ordbiljett</strong> <button type="button" class="btn lyssna">🔊 Hör ordet</button><div class="ordbild"></div><p>Tryck eller dra bokstäverna till biljetten.</p><div class="ordrutor" aria-live="polite"></div><div class="brickor"></div><details><summary>Skriv själv</summary><form><input aria-label="Ditt ord" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="12"><button class="btn">Stämpla</button></form></details><p class="ordtips" role="status"></p>';
   ruta.querySelector(".ordbild").textContent = bild;
+  ruta.querySelector("strong").outerHTML = '<h2 id="bokrubrik">Bygg ' + ord + '</h2>';
   ruta.querySelector(".lyssna").onclick = () => lasBiljett(ord);
   lasBiljett(ord);
   const rutor = ruta.querySelector(".ordrutor"), tips = ruta.querySelector(".ordtips");
   let svar = "";
-  function visaSvar(){ rutor.textContent = [...ord].map((b,i)=>svar[i] || "＿").join(" "); }
+  function visaSvar(){
+    rutor.innerHTML = [...ord].map((b,i)=>i<svar.length ? b : i===svar.length ? "<em>"+b+"</em>" : "＿").join(" ");
+    tips.textContent = "Hitta " + ord[svar.length] + ".";
+  }
   function stämpla(){
     p.ordbiljetter = antal + 1; saveProfiles();
     ruta.replaceChildren();
     const klar = document.createElement("strong");
     klar.setAttribute("role","status"); klar.textContent = "✓ Stämplad! " + bild + " " + ord;
     ruta.append(klar); lasBiljett(ord);
+    if(fortsatt){
+      klar.id = "bokrubrik";
+      const nasta = document.createElement("button");
+      nasta.type="button"; nasta.className="btn"; nasta.textContent="Nästa bild →";
+      nasta.onclick=fortsatt; ruta.append(nasta); nasta.focus({preventScroll:true});
+    }
   }
   function sätt(b,knapp){
     if(b !== ord[svar.length]){ tips.textContent = "Prova igen. Nästa bokstav är " + ord[svar.length] + "."; return; }
@@ -6576,7 +6635,7 @@ sheet.addEventListener("click", (e) => {
   const startstopp = e.target.closest("[data-startstopp]");
   if(startstopp){ SFX.tap(); openPerrong(startstopp.dataset.startstopp); return; }
   if(e.target.closest('[data-action="alla-startplatser"]')){
-    SFX.tap(); closeSheet(); startVisa.annanstans = true; renderStart();
+    SFX.tap(); closeSheet(); startVisa.extra = true; startVisa.annanstans = true; renderStart();
     el("sektionAnnanstans").scrollIntoView({block:"start",behavior:reduceMotion ? "auto" : "smooth"}); return;
   }
   if(e.target.closest('[data-action="minvagn"]')){ SFX.tap(); openMinVagn(); return; }

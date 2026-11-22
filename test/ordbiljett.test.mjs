@@ -9,7 +9,7 @@ function prov(){
   const p = {}, spelade = [];
   function element(){
     const delar = new Map();
-    return {barn:[], style:{}, setAttribute(){}, append(k){this.barn.push(k);},
+    return {barn:[], style:{}, focus(){}, showModal(){this.open=true;},close(){this.open=false;this.onclose?.();},setAttribute(){}, append(k){this.barn.push(k);},
       replaceChildren(){this.barn=[];delar.clear();},
       getBoundingClientRect:()=>({left:0,right:50,top:0,bottom:50}),
       setPointerCapture(){},hasPointerCapture:()=>true,
@@ -17,12 +17,19 @@ function prov(){
     };
   }
   const ruta = element();
-  const c=vm.createContext({P:()=>p, el:()=>ruta, saveProfiles(){}, shuffle(){},
+  const dialog=element(), tillbaka=element(), start=element();
+  const c=vm.createContext({P:()=>p, aktivSkarm:"trip",speak(){},tystna(){},el:id=>({bokrum:dialog,bokyta:ruta,lamnaBok:tillbaka,ordbiljett:start})[id], saveProfiles(){}, shuffle(){},
     document:{createElement:element},Audio:class{
       constructor(src){this.src=src;} pause(){} play(){spelade.push(this.src);return Promise.resolve();}
     }});
   vm.runInContext(kod,c);
-  c.visaBiljettknapp(false); ruta.barn[0].onclick();
+  c.visaBiljettknapp(false); start.barn[0].onclick();
+  assert.equal(dialog.open,true);
+  assert.equal(tillbaka.textContent,"← Till kartan");
+  assert.equal(p.ordbiljetter,undefined);
+  ruta.querySelector(".bokstavskort").onclick();
+  assert.equal(p.bokkort,1);
+  ruta.querySelector(".bokval").querySelector(".stava").onclick();
   return {p,ruta,c,spelade};
 }
 test("ordbiljetten kan dras och tryckas, fel ger en ny chans",()=>{

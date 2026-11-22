@@ -1,9 +1,10 @@
 /* Räknelandets servicearbetare — gör att spelet fungerar utan nätverk.
    Höj versionen när spelet ändras, så hämtas det nya vid nästa start. */
-const VERSION = "ordvagnen-v1";
+const VERSION = "ordvagnen-v2";
 const SKAL = [
   "./", "./index.html", "./manifest.webmanifest", "./utflykt.mjs", "./utflykt.css",
-  "./apple-touch-icon.png", "./ikon-192.png", "./ikon-512.png"
+  "./apple-touch-icon.png", "./ikon-192.png", "./ikon-512.png",
+  ...["sol","mus","ros","bil","hus","sko"].flatMap(ord => ["./ljud/ord/"+ord+".m4a","./ljud/ord/kort-"+ord+".m4a"])
 ];
 
 self.addEventListener("install", (e) => {
