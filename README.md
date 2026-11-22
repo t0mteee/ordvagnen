@@ -1,4 +1,12 @@
-# Räknelandet
+# Ordvagnen
+
+Ett eget spel baserat på Räknelandet version 37. Välj en hållplats och en
+spårvagn. Åk fritt eller öppna en ordbiljett och lyssna, dra bokstäver,
+tryck på brickor eller skriv ordet själv. Spelprofiler sparas separat.
+
+[Spela Ordvagnen](https://t0mteee.github.io/ordvagnen/)
+
+## Om originalspelet Räknelandet
 
 Ett färgglatt mattespel på svenska för barn från ungefär fyra år. Byggt med
 vanlig HTML, CSS och JavaScript utan byggsteg. Kör på GitHub Pages eller med

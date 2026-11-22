@@ -5143,7 +5143,7 @@ function renderStart(){
               : startFilter === "and" ? ANDSTATIONER.slice().sort((a, b) => a.localeCompare(b, "sv"))
               : (lineByRef(startFilter) || TRAM_LINES[0]).stops;
   el("startTram").innerHTML = `
-    <div class="tram-start"><h1>Åk vart du vill</h1><p>Välj vagn, följ kartan och byt linje när du vill.</p></div>
+    <div class="tram-start"><h1>Ordvagnen</h1><p>Välj en vagn. Vid hållplatsen kan du ta en ordbiljett eller åka vidare.</p></div>
     ${r ? `<button class="fortsatt" data-fortsatt type="button">
         ${stoppBildHTML(r.pos)}
         <span style="min-width:0"><b>Fortsätt resan</b><small>Från ${r.pos} · linje ${r.ref} mot ${r.rikt === 1 ? rl.b : rl.a}</small></span>
@@ -5262,7 +5262,7 @@ function openPerrong(namn, andstation){
           <span class="pil">${a.rikt === 1 ? "→" : "←"}</span>
         </button>`; }).join("")}
     </div>
-    <p class="sheet-sub" style="margin:12px 0 0">Du väljer vägen själv. Mattenivån kan en vuxen ändra under kugghjulet på startsidan.</p>`);
+    <p class="sheet-sub" style="margin:12px 0 0">Du väljer vägen själv.</p>`);
   speakUtrop(namn + (andstation ? ". Ändstation." : ""));
 }
 
@@ -6198,8 +6198,8 @@ function enterWorld(halsa, isNew){
     window.scrollTo({top:0,behavior:"auto"});
   }
   if(halsa){
-    const h = isNew ? `Hej ${p.name}! Välkommen till Räknelandet!`
-      : pick([`Hej igen, ${p.name}!`, `Hej ${p.name}! Kul att du är tillbaka!`, `Hej ${p.name}! Ska vi räkna?`]);
+    const h = isNew ? `Hej ${p.name}! Välkommen till Ordvagnen!`
+      : pick([`Hej igen, ${p.name}!`, `Hej ${p.name}! Kul att du är tillbaka!`, `Hej ${p.name}! Ska vi åka vagn?`]);
     later(() => speak(h), 400);
   }
 }
