@@ -12,10 +12,10 @@
 <link rel="icon" href="./ikon-192.png" sizes="192x192">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Räknelandet">
+<meta name="apple-mobile-web-app-title" content="Ordvagnen">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="application-name" content="Räknelandet">
-<title>Räknelandet</title>
+<meta name="application-name" content="Ordvagnen">
+<title>Ordvagnen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600..800&family=Lilita+One&family=Nunito:wght@700;800&display=swap">
@@ -1357,6 +1357,12 @@ body.stilla *, body.stilla *::before, body.stilla *::after{
   animation-duration: .01ms !important; animation-iteration-count: 1 !important;
   transition-duration: .01ms !important;
 }
+#ordbiljett:not(:empty){margin:12px 0;padding:12px;background:#fff6d7;border:2px dashed var(--ink);border-radius:16px;text-align:center}
+#ordbiljett .btn{padding:8px 12px;font-size:1rem}
+.ordbild{font-size:3rem}.ordrutor{padding:12px;background:white;border-radius:10px;font-size:1.7rem}
+.brickor{display:flex;gap:12px;justify-content:center;margin:14px}
+#ordbiljett .bricka{touch-action:none;user-select:none;font-size:1.5rem;min-width:48px}
+#ordbiljett input{font-size:18px;width:8em}
 </style>
 </head>
 <body>
@@ -1371,7 +1377,7 @@ body.stilla *, body.stilla *::before, body.stilla *::after{
   <!-- ── VÄLJ SPELARE ───────────────────── -->
   <section id="screen-profiles" class="screen">
     <header class="brand">
-      <h1>Räknelandet</h1>
+      <h1>Ordvagnen</h1>
       <p class="tagline">Vem ska spela?</p>
     </header>
     <div class="panel">
@@ -1455,6 +1461,7 @@ body.stilla *, body.stilla *::before, body.stilla *::after{
     <div class="trip-status" id="tripStatus" role="status"></div>
     <div class="natkarta" id="natkarta" aria-label="Spårvagnskarta"></div>
     <button class="btn go-btn" id="goBtn" type="button">Åk till nästa hållplats!</button>
+    <section id="ordbiljett" aria-label="Ordbiljett"></section>
     <div class="trip-knappar">
       <button class="btn" data-trip="byt" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>
@@ -1591,8 +1598,8 @@ function shuffle(a){ for(let i = a.length - 1; i > 0; i--){ const j = rnd(i + 1)
 
 function store(key, val){
   try{
-    if(val === undefined){ const v = localStorage.getItem("rakn." + key); return v === null ? null : JSON.parse(v); }
-    localStorage.setItem("rakn." + key, JSON.stringify(val));
+    if(val === undefined){ const v = localStorage.getItem("ordvagnen." + key); return v === null ? null : JSON.parse(v); }
+    localStorage.setItem("ordvagnen." + key, JSON.stringify(val));
   }catch(e){ /* privat läge – spelet funkar ändå */ }
   return null;
 }
@@ -3830,7 +3837,7 @@ function utropOppna(){
   if(utropDb) return Promise.resolve(utropDb);
   return new Promise((res, rej) => {
     if(!window.indexedDB) return rej(new Error("ingen databas"));
-    const req = indexedDB.open("raknelandet-utrop", 1);
+    const req = indexedDB.open("ordvagnen-utrop", 1);
     req.onupgradeneeded = () => req.result.createObjectStore("klipp");
     req.onsuccess = () => { utropDb = req.result; res(utropDb); };
     req.onerror = () => rej(req.error);
@@ -4051,7 +4058,7 @@ function newProfile(name, char){
     name: name, char: char,
     coins: 0, stars: {}, best: {},
     unlocked: 1, badges: [], bestStreak: 0, perfect: 0, rounds: 0,
-    world: "land", tram: {}, tramLine: null, tramLevel: -1, tramMode: "choice", skill: null,
+    world: "tram", tram: {}, tramLine: null, tramLevel: -1, tramMode: "choice", skill: null,
     stopsRidden: 0, linesDone: [], kopta: [], kluriga: [], spel: [], rekord: {},
     settings: { sound:true, voice:true, dots:true, rate:1 }
   };
@@ -5874,6 +5881,7 @@ function renderTrip(animera){
 
   const sparradNu = !slut && sparradFram(p);
   el("goBtn").disabled = tripRullar;
+  visaBiljettknapp(tripRullar || slut || sparradNu);
   const bytKnapp = document.querySelector('[data-trip="byt"]');
   bytKnapp.hidden = slut || sparradNu;
   bytKnapp.disabled = tripRullar;
@@ -5918,7 +5926,7 @@ function rullaFram(till){
   animeraNatkarta(l, fran, till, 2400, klar);
 }
 function reseBeloningHTML(b){
-  return `<p><b>Framme vid ${escapeHtml(b.stopp)}!</b> +${b.mynt} mynt</p>
+  return `<p><b>Framme vid ${escapeHtml(b.stopp)}!</b> ${b.mynt ? "+" + b.mynt + " mynt" : ""}</p>
     ${b.resmal ? `<p>Resmålet är nått! +${b.resmal.beloning} mynt extra.</p>` : ""}
     ${b.bana ? `<p>Ny räknebana: ${escapeHtml(b.bana.name)}</p>` : ""}
     ${b.kort.length || b.marken.length ? '<button class="btn" data-rese-nytt type="button">Se nya vagnkort och märken</button>' : ""}`;
@@ -6105,9 +6113,77 @@ el("goBtn").addEventListener("click", () => {
   const { slut } = resLage(p);
   if(slut || sparradFram(p)){ openPerrong(p.resa.pos, slut); return; }
   SFX.klocka();
-  startRound(tramLevelDef(p), p.tramMode, tripRef);
+  flyttaTillHallplats(p, 0, null, []);
 });
 
+const biljettOrd = [["sol","☀️"],["mus","🐭"],["ros","🌹"],["bil","🚗"],["hus","🏠"],["sko","👟"]];
+let biljettLjud;
+function lasBiljett(ord){
+  if(biljettLjud) biljettLjud.pause();
+  if(P().settings?.voice === false) return;
+  biljettLjud = new Audio("./ljud/ord/" + ord + ".m4a");
+  biljettLjud.play().catch(() => speak(ord, true));
+}
+function visaBiljettknapp(dold){
+  const ruta = el("ordbiljett");
+  if(biljettLjud) biljettLjud.pause();
+  ruta.replaceChildren();
+  if(dold) return;
+  const knapp = document.createElement("button");
+  knapp.type = "button"; knapp.className = "btn"; knapp.textContent = "🎟️ Ta en ordbiljett";
+  ruta.append(knapp);
+  knapp.onclick = () => oppnaOrdbiljett(ruta);
+}
+function oppnaOrdbiljett(ruta){
+  const p = P(), antal = Number.isSafeInteger(p.ordbiljetter) ? p.ordbiljetter : 0;
+  const [ord,bild] = biljettOrd[antal % biljettOrd.length];
+  ruta.innerHTML = '<strong>Ordbiljett</strong> <button type="button" class="btn lyssna">🔊 Hör ordet</button><div class="ordbild"></div><p>Tryck eller dra bokstäverna till biljetten.</p><div class="ordrutor" aria-live="polite"></div><div class="brickor"></div><details><summary>Skriv själv</summary><form><input aria-label="Ditt ord" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="12"><button class="btn">Stämpla</button></form></details><p class="ordtips" role="status"></p>';
+  ruta.querySelector(".ordbild").textContent = bild;
+  ruta.querySelector(".lyssna").onclick = () => lasBiljett(ord);
+  lasBiljett(ord);
+  const rutor = ruta.querySelector(".ordrutor"), tips = ruta.querySelector(".ordtips");
+  let svar = "";
+  function visaSvar(){ rutor.textContent = [...ord].map((b,i)=>svar[i] || "＿").join(" "); }
+  function stämpla(){
+    p.ordbiljetter = antal + 1; saveProfiles();
+    ruta.replaceChildren();
+    const klar = document.createElement("strong");
+    klar.setAttribute("role","status"); klar.textContent = "✓ Stämplad! " + bild + " " + ord;
+    ruta.append(klar); lasBiljett(ord);
+  }
+  function sätt(b,knapp){
+    if(b !== ord[svar.length]){ tips.textContent = "Prova igen. Nästa bokstav är " + ord[svar.length] + "."; return; }
+    tips.textContent = ""; svar += b; knapp.disabled = true; visaSvar();
+    if(svar === ord) stämpla();
+  }
+  visaSvar();
+  const brickor = [...ord]; shuffle(brickor);
+  for(const b of brickor){
+    const k = document.createElement("button");
+    k.className = "btn bricka"; k.type = "button"; k.textContent = b;
+    let drag = false, x, y;
+    k.onclick = e => { if(!drag || e.detail===0) sätt(b,k); drag=false; };
+    k.onpointerdown = e => { drag=false; x=e.clientX; y=e.clientY; k.setPointerCapture(e.pointerId); };
+    k.onpointermove = e => {
+      if(!k.hasPointerCapture(e.pointerId)) return;
+      const dx=e.clientX-x, dy=e.clientY-y;
+      if(Math.hypot(dx,dy)>7){ drag=true; k.style.transform="translate("+dx+"px,"+dy+"px)"; }
+    };
+    k.onpointercancel = () => { k.style.transform=""; drag=false; };
+    k.onpointerup = e => {
+      k.style.transform="";
+      if(!drag) return;
+      const r=rutor.getBoundingClientRect();
+      if(e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom) sätt(b,k);
+    };
+    ruta.querySelector(".brickor").append(k);
+  }
+  ruta.querySelector("form").onsubmit = e => {
+    e.preventDefault();
+    if(ruta.querySelector("input").value.trim().normalize().toLowerCase()===ord) stämpla();
+    else tips.textContent="Lyssna igen eller prova med brickorna.";
+  };
+}
 /* ── Byt värld ──────────────────────────── */
 
 function enterWorld(halsa, isNew){
@@ -8384,6 +8460,10 @@ function finishTramStop(p, perfect){
     if(spelad) nyBana = oppnaEfter(p, spelad);
     if(!nyBana && spelad) nyBana = sidosparEfter(p, spelad);
   }
+  flyttaTillHallplats(p, g.score, nyBana, g.nyaKort.slice());
+}
+function flyttaTillHallplats(p, mynt, nyBana, kort){
+  const {l, rikt, at, slut} = resLage(p);
   const nästa = slut ? at : at + rikt;
   p.resa.pos = l.stops[nästa];
   /* Framme vid uppdragets mål? Då väntar belöningen här */
@@ -8403,7 +8483,7 @@ function finishTramStop(p, perfect){
   saveProfiles();
   tripFrom = at;
   const nya = newBadges(p);
-  reseBeloning = {player:p.id, stopp:p.resa.pos, mynt:g.score, resmal:klart, bana:nyBana, kort:g.nyaKort.slice(), marken:nya};
+  reseBeloning = {player:p.id, stopp:p.resa.pos, mynt, resmal:klart, bana:nyBana, kort, marken:nya};
   /* Resan fortsätter på kartan. Belöningar finns kvar utan att lägga sig över den. */
   openTrip(true);
   SFX.win();

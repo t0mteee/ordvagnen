@@ -1,7 +1,7 @@
 {
-  "name": "Räknelandet",
-  "short_name": "Räknelandet",
-  "description": "Mattespel för barn – räkna, plussa och minusa genom Räknelandet eller åk Göteborgs spårvagnar hållplats för hållplats.",
+  "name": "Ordvagnen",
+  "short_name": "Ordvagnen",
+  "description": "Mattespel för barn – räkna, plussa och minusa genom Ordvagnen eller åk Göteborgs spårvagnar hållplats för hållplats.",
   "lang": "sv",
   "dir": "ltr",
   "start_url": "./",

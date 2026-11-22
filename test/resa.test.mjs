@@ -73,7 +73,7 @@ function reseMotor(rikt = 1, resmal = false){
     besoktaPa:(p,ref) => p.besokta[ref] || [],linjeKlar:()=>false,
     newBadges:()=>["provmarke"],justeraSkill:()=>calls.push("skill"),
     saveProfiles:()=>calls.push("spara"),openTrip:a=>calls.push(["trip",a]),SFX:{win:()=>calls.push("ljud")}});
-  vm.runInContext(html.match(/const matteFraga = [^\n]*/)[0] + "\n" + fn("matteResultat") + "\n" + fn("resLage") + "\n" + fn("finishTramStop"),c);
+  vm.runInContext(html.match(/const matteFraga = [^\n]*/)[0] + "\n" + fn("matteResultat") + "\n" + fn("resLage") + "\n" + fn("finishTramStop") + "\n" + fn("flyttaTillHallplats"),c);
   return {c,p,g,calls,l};
 }
 

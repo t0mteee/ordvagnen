@@ -1,6 +1,6 @@
 /* Räknelandets servicearbetare — gör att spelet fungerar utan nätverk.
    Höj versionen när spelet ändras, så hämtas det nya vid nästa start. */
-const VERSION = "raknelandet-v37-r1";
+const VERSION = "ordvagnen-v1";
 const SKAL = [
   "./", "./index.html", "./manifest.webmanifest", "./utflykt.mjs", "./utflykt.css",
   "./apple-touch-icon.png", "./ikon-192.png", "./ikon-512.png"
@@ -17,7 +17,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then(nycklar => Promise.all(nycklar.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(nycklar => Promise.all(nycklar.filter(k => k.startsWith("ordvagnen-") && k !== VERSION).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
